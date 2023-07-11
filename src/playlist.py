@@ -1,21 +1,20 @@
-import os
 from datetime import timedelta
 import isodate
-from googleapiclient.discovery import build
+from src.base_youtube_service import BaseYouTubeService
 
 
-class PlayList:
+class PlayList(BaseYouTubeService):
     """Класс для ютуб-плейлиста"""
-    api_key: str = str(os.getenv('API_KEY'))
-    youtube = build('youtube', 'v3', developerKey=api_key)
+    base_url = 'https://www.youtube.com/playlist?list='
 
     def __init__(self, playlist_id) -> None:
         """Экземпляр инициализируется id видео. Дальше все данные будут подтягиваться по API."""
+        super().__init__()
         self.__playlist_id = playlist_id
         self.title: str = self.youtube.playlists().list(id=playlist_id, part='snippet,contentDetails',
                                                         maxResults=50).execute().get('items')[0].get('snippet').get(
             'title')
-        self.url = f'https://www.youtube.com/playlist?list={self.__playlist_id}'
+        self.url = f'{self.base_url}{self.__playlist_id}'
 
         self.__playlist_videos = self.youtube.playlistItems().list(playlistId=playlist_id,
                                                                    part='contentDetails',

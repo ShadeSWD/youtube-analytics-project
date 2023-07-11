@@ -1,18 +1,17 @@
-import os
-from googleapiclient.discovery import build
+from src.base_youtube_service import BaseYouTubeService
 
 
-class Video:
+class Video(BaseYouTubeService):
     """Класс для ютуб-видео"""
-    api_key: str = str(os.getenv('API_KEY'))
-    youtube = build('youtube', 'v3', developerKey=api_key)
+    base_url = f'https://www.youtube.com/watch?v='
 
     def __init__(self, video_id) -> None:
         """Экземпляр инициализируется id видео. Дальше все данные будут подтягиваться по API."""
+        super().__init__()
         self.__video_id = video_id
         video_response = self.youtube.videos().list(id=self.__video_id, part='snippet,statistics').execute()
         self.title: str = video_response['items'][0]['snippet']['title']
-        self.url = f'https://www.youtube.com/watch?v={self.__video_id}'
+        self.url = f'{self.base_url}{self.__video_id}'
         self.view_count: int = video_response['items'][0]['statistics']['viewCount']
         self.like_count: int = video_response['items'][0]['statistics']['likeCount']
 
