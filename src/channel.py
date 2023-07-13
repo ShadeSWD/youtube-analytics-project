@@ -10,14 +10,22 @@ class Channel(BaseYouTubeService):
         """Экземпляр инициализируется id канала. Дальше все данные будут подтягиваться по API."""
         super().__init__()
         self.__channel_id = channel_id
-        channel = self.youtube.channels().list(id=self.__channel_id, part='snippet,statistics').execute()
+        try:
+            channel = self.youtube.channels().list(id=self.__channel_id, part='snippet,statistics').execute()
 
-        self.title = channel["items"][0]["snippet"]["title"]
-        self.description = channel["items"][0]["snippet"]["description"]
-        self.url = f'{self.base_url}{self.__channel_id}'
-        self.subscriber_count = int(channel["items"][0]["statistics"]["subscriberCount"])
-        self.video_count = int(channel["items"][0]["statistics"]["videoCount"])
-        self.view_count = int(channel["items"][0]["statistics"]["viewCount"])
+            self.title = channel["items"][0]["snippet"]["title"]
+            self.description = channel["items"][0]["snippet"]["description"]
+            self.url = f'{self.base_url}{self.__channel_id}'
+            self.subscriber_count = int(channel["items"][0]["statistics"]["subscriberCount"])
+            self.video_count = int(channel["items"][0]["statistics"]["videoCount"])
+            self.view_count = int(channel["items"][0]["statistics"]["viewCount"])
+        except IndexError:
+            self.title = None
+            self.description = None
+            self.url = None
+            self.subscriber_count = None
+            self.video_count = None
+            self.view_count = None
 
     def __str__(self):
         return f"{self.title} ({self.url})"
