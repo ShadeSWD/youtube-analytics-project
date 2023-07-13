@@ -11,19 +11,24 @@ class PlayList(BaseYouTubeService):
         """Экземпляр инициализируется id видео. Дальше все данные будут подтягиваться по API."""
         super().__init__()
         self.__playlist_id = playlist_id
-        self.title: str = self.youtube.playlists().list(id=playlist_id, part='snippet,contentDetails',
-                                                        maxResults=50).execute().get('items')[0].get('snippet').get(
-            'title')
-        self.url = f'{self.base_url}{self.__playlist_id}'
+        try:
+            self.title: str = self.youtube.playlists().list(id=playlist_id, part='snippet,contentDetails',
+                                                            maxResults=50).execute().get('items')[0].get('snippet').get(
+                'title')
+            self.url = f'{self.base_url}{self.__playlist_id}'
 
-        self.__playlist_videos = self.youtube.playlistItems().list(playlistId=playlist_id,
-                                                                   part='contentDetails',
-                                                                   maxResults=50,
-                                                                   ).execute()
-        self.__video_ids: list[str] = [video['contentDetails']['videoId'] for video in self.__playlist_videos['items']]
-        self.__video_response = self.youtube.videos().list(part='contentDetails,statistics',
-                                                           id=','.join(self.__video_ids)
-                                                           ).execute()
+            self.__playlist_videos = self.youtube.playlistItems().list(playlistId=playlist_id,
+                                                                       part='contentDetails',
+                                                                       maxResults=50,
+                                                                       ).execute()
+            self.__video_ids: list[str] = [video['contentDetails']['videoId'] for video in
+                                           self.__playlist_videos['items']]
+            self.__video_response = self.youtube.videos().list(part='contentDetails,statistics',
+                                                               id=','.join(self.__video_ids)
+                                                               ).execute()
+        except IndexError:
+            self.title = None
+            self.url = None
 
     def __str__(self):
         return f"{self.title}"
